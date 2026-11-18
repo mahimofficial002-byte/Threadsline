@@ -1,0 +1,434 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Threadsline</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;1,6..96,400&family=Manrope:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap">
+<style>
+/* Layout: sticky slim header, split Men/Women hero, filter bar (gender + garment type), 4-up product grid, slide-in cart drawer.
+   Palette: stone paper, ink, deep indigo thread, sage, muted brass line. */
+:root {
+  --bg: #EFF0ED;
+  --surface: #F8F8F6;
+  --tile: #E3E5E0;
+  --fg: #14181F;
+  --muted: #5C6470;
+  --line: #CDD0CA;
+  --accent: #27336B;
+  --accent-fg: #F5F6F8;
+  --sage: #A9B8A6;
+  --brass: #A8873F;
+  --font-display: "Bodoni Moda", "Didot", "Times New Roman", serif;
+  --font-body: "Manrope", "Hind Siliguri", system-ui, sans-serif;
+  --font-bn: "Hind Siliguri", "Manrope", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101317; --surface: #171B21; --tile: #1E242B; --fg: #ECEDEA; --muted: #9AA2AD;
+    --line: #2B323B; --accent: #8E9CE6; --accent-fg: #10131A; --sage: #7F917C; --brass: #C9A75E;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101317; --surface: #171B21; --tile: #1E242B; --fg: #ECEDEA; --muted: #9AA2AD;
+  --line: #2B323B; --accent: #8E9CE6; --accent-fg: #10131A; --sage: #7F917C; --brass: #C9A75E;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 40; background: var(--bg); }
+button { font: inherit; color: inherit; cursor: pointer; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.wrap { max-width: 1240px; margin: 0 auto; }
+
+/* header */
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); border-bottom: 1px solid var(--line); }
+.bar-in { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 14px; }
+.logo { font-family: var(--font-display); font-size: 26px; letter-spacing: .02em; text-decoration: none; display: inline-flex; align-items: baseline; gap: 1px; }
+.logo i { font-style: italic; color: var(--accent); }
+.nav { display: flex; gap: 22px; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
+.nav a { text-decoration: none; color: var(--muted); padding-block: 4px; border-bottom: 1px solid transparent; }
+.nav a:hover { color: var(--fg); border-color: var(--brass); }
+.cart-btn { display: inline-flex; align-items: center; gap: 10px; border: 1px solid var(--fg); background: transparent; padding: 9px 16px; border-radius: 999px; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; }
+.cart-btn:hover { background: var(--fg); color: var(--bg); }
+.cart-count { font-variant-numeric: tabular-nums; min-width: 20px; height: 20px; border-radius: 10px; background: var(--accent); color: var(--accent-fg); font-size: 11px; display: inline-grid; place-items: center; padding-inline: 5px; }
+
+/* hero */
+.hero { display: grid; grid-template-columns: 1.1fr 1fr; gap: 40px; align-items: end; padding-block: 64px 48px; }
+.eyebrow { font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 12px; }
+.eyebrow::before { content: ""; width: 36px; height: 1px; background: var(--brass); }
+.hero h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(44px, 7.4vw, 96px); line-height: .98; letter-spacing: -.01em; margin: 18px 0 20px; text-wrap: balance; }
+.hero h1 em { color: var(--accent); }
+.hero p { max-width: 46ch; color: var(--muted); margin: 0 0 28px; }
+.cta { display: inline-flex; gap: 10px; align-items: center; background: var(--accent); color: var(--accent-fg); border: 0; padding: 14px 26px; border-radius: 999px; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; text-decoration: none; font-weight: 600; }
+.cta:hover { filter: brightness(1.1); }
+.hero-art { position: relative; aspect-ratio: 5/4; max-width: 100%; background: var(--tile); border-radius: 200px 200px 6px 6px; overflow: hidden; display: grid; place-items: center; }
+.hero-art svg { width: 78%; max-width: 100%; height: auto; }
+.hero-art .stitch { position: absolute; inset: 14px; border: 1px dashed var(--brass); border-radius: 190px 190px 2px 2px; pointer-events: none; opacity: .7; }
+
+/* chele / meye tiles */
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding-bottom: 24px; }
+.tile { position: relative; display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 26px 26px 22px; min-height: 190px; overflow: hidden; }
+.tile:hover { border-color: var(--fg); }
+.tile .bn { font-family: var(--font-bn); font-size: 14px; color: var(--muted); }
+.tile h2 { font-family: var(--font-display); font-weight: 400; font-size: clamp(32px, 4vw, 48px); margin: 4px 0 6px; line-height: 1; }
+.tile .sub { color: var(--muted); font-size: 13px; }
+.tile .art { width: 120px; flex: none; }
+.tile .art svg { width: 100%; height: auto; display: block; }
+.tile .arrow { font-size: 22px; color: var(--accent); }
+
+/* shop */
+.shop { padding-top: 40px; scroll-margin-top: 80px; }
+.shop-head { display: flex; justify-content: space-between; align-items: end; gap: 16px; flex-wrap: wrap; }
+.shop-head h2 { font-family: var(--font-display); font-weight: 400; font-size: clamp(30px, 4vw, 44px); margin: 0; line-height: 1.05; }
+.count { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.filters { display: flex; flex-wrap: wrap; gap: 14px 28px; align-items: center; padding-block: 22px; border-bottom: 1px solid var(--line); margin-bottom: 28px; }
+.group { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.group-label { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
+.chip { border: 1px solid var(--line); background: transparent; padding: 8px 16px; border-radius: 999px; font-size: 13px; }
+.chip:hover { border-color: var(--fg); }
+.chip[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.chip .bn { font-family: var(--font-bn); opacity: .7; margin-left: 4px; font-size: 12px; }
+
+.grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 28px 20px; }
+.card { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.shot { position: relative; background: var(--tile); aspect-ratio: 4/5; max-width: 100%; border-radius: 4px; display: grid; place-items: center; overflow: hidden; }
+.shot svg { width: 72%; height: auto; transition: transform .35s ease; }
+.card:hover .shot svg { transform: translateY(-4px) scale(1.03); }
+.tag { position: absolute; top: 12px; left: 12px; background: var(--surface); border: 1px solid var(--line); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; padding: 4px 9px; border-radius: 999px; }
+.meta { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.name { font-weight: 600; font-size: 15px; margin: 0; }
+.kind { color: var(--muted); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; margin: 2px 0 0; }
+.price { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+.row { display: flex; gap: 8px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.sizes { display: flex; gap: 6px; }
+.sz { min-width: 34px; height: 34px; border: 1px solid var(--line); background: transparent; border-radius: 4px; font-size: 12px; padding: 0 6px; }
+.sz:hover { border-color: var(--fg); }
+.sz[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.add { border: 1px solid var(--fg); background: transparent; border-radius: 999px; padding: 8px 16px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+.add:hover { background: var(--fg); color: var(--bg); }
+.empty { padding: 60px 0; text-align: center; color: var(--muted); }
+
+/* story strip */
+.story { margin-top: 72px; border-block: 1px solid var(--line); padding-block: 40px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
+.story h3 { font-family: var(--font-display); font-weight: 400; font-size: 22px; margin: 0 0 8px; }
+.story p { margin: 0; color: var(--muted); font-size: 14px; max-width: 38ch; }
+.story .mk { width: 28px; height: 1px; background: var(--brass); margin-bottom: 14px; }
+
+footer { padding-block: 40px 48px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 18px; color: var(--muted); font-size: 13px; }
+footer .logo { color: var(--fg); font-size: 22px; }
+
+/* cart drawer */
+.veil { position: fixed; inset: 0; background: rgba(10, 12, 16, .5); z-index: 50; }
+.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(430px, 100%); background: var(--surface); z-index: 60; display: flex; flex-direction: column; border-left: 1px solid var(--line);
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) 0; }
+.d-head { display: flex; justify-content: space-between; align-items: center; padding: 20px 22px; border-bottom: 1px solid var(--line); }
+.d-head h2 { font-family: var(--font-display); font-weight: 400; font-size: 26px; margin: 0; }
+.x { border: 0; background: transparent; font-size: 26px; line-height: 1; padding: 4px 8px; }
+.d-body { flex: 1; overflow-y: auto; padding: 8px 22px; min-height: 0; }
+.line { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 14px; padding: 16px 0; border-bottom: 1px solid var(--line); align-items: center; }
+.line .th { width: 64px; height: 76px; background: var(--tile); border-radius: 3px; display: grid; place-items: center; }
+.line .th svg { width: 70%; height: auto; }
+.line .nm { font-weight: 600; font-size: 14px; }
+.line .sm { color: var(--muted); font-size: 12px; margin-top: 2px; }
+.qty { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; margin-top: 8px; }
+.qty button { border: 0; background: transparent; width: 28px; height: 28px; font-size: 16px; }
+.qty span { min-width: 22px; text-align: center; font-variant-numeric: tabular-nums; font-size: 13px; }
+.rm { border: 0; background: transparent; color: var(--muted); font-size: 12px; text-decoration: underline; padding: 0; margin-top: 6px; display: block; margin-left: auto; }
+.lp { font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; }
+.d-foot { border-top: 1px solid var(--line); padding: 18px 22px 22px; display: grid; gap: 12px; }
+.tot { display: flex; justify-content: space-between; font-size: 16px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.d-foot .cta { width: 100%; justify-content: center; border: 0; }
+.note { color: var(--muted); font-size: 12px; margin: 0; }
+.field { display: grid; gap: 6px; margin-bottom: 14px; }
+.field label { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.field input, .field textarea { font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 11px 12px; width: 100%; }
+.sumline { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; padding-block: 4px; }
+.ghost { background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 12px; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; }
+.toast { position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 11px 20px; border-radius: 999px; font-size: 13px; z-index: 80; max-width: calc(100% - 32px); }
+
+@media (max-width: 1000px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 760px) {
+  .nav { display: none; }
+  .hero { grid-template-columns: 1fr; padding-block: 36px 32px; gap: 28px; }
+  .hero-art { max-width: 420px; }
+  .split { grid-template-columns: 1fr; }
+  .tile { min-height: 150px; }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 12px; }
+  .story { grid-template-columns: 1fr; gap: 24px; }
+  .sz { min-width: 30px; height: 30px; }
+  .meta { flex-direction: column; gap: 2px; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .shot svg { transition: none; } }
+</style>
+
+<header class="bar">
+  <div class="wrap bar-in">
+    <a class="logo" href="#top" aria-label="Threadsline home">Threads<i>line</i></a>
+    <nav class="nav" aria-label="Main">
+      <a href="#shop" data-go="all">Shop</a>
+      <a href="#shop" data-go="men">Men</a>
+      <a href="#shop" data-go="women">Women</a>
+    </nav>
+    <button class="cart-btn" id="openCart" aria-label="Open cart">Bag <span class="cart-count" id="cartCount">0</span></button>
+  </div>
+</header>
+
+<main class="wrap" id="top">
+  <section class="hero">
+    <div>
+      <div class="eyebrow">New season &middot; Shirt, Panjabi, Pant, Western</div>
+      <h1>Clothes cut <em>clean</em>, worn all year.</h1>
+      <p>Threadsline makes everyday and festive clothing for men and women. Quiet colours, honest fabrics, and fits that hold their shape after the wash.</p>
+      <a class="cta" href="#shop">Shop the collection</a>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+      <div class="stitch"></div>
+      <div id="heroSvg"></div>
+    </div>
+  </section>
+
+  <section class="split" aria-label="Shop by category">
+    <button class="tile" data-go="men">
+      <div>
+        <div class="bn">ছেলেদের</div>
+        <h2>Men</h2>
+        <div class="sub">Shirt, Panjabi, Pant, Western</div>
+      </div>
+      <div class="art" id="tileMen"></div>
+    </button>
+    <button class="tile" data-go="women">
+      <div>
+        <div class="bn">মেয়েদের</div>
+        <h2>Women</h2>
+        <div class="sub">Shirt, Panjabi, Pant, Western</div>
+      </div>
+      <div class="art" id="tileWomen"></div>
+    </button>
+  </section>
+
+  <section class="shop" id="shop">
+    <div class="shop-head">
+      <h2>The collection</h2>
+      <div class="count" id="count" aria-live="polite"></div>
+    </div>
+    <div class="filters">
+      <div class="group" role="group" aria-label="For">
+        <span class="group-label">For</span>
+        <button class="chip" data-g="all" aria-pressed="true">All</button>
+        <button class="chip" data-g="men" aria-pressed="false">Men <span class="bn">ছেলে</span></button>
+        <button class="chip" data-g="women" aria-pressed="false">Women <span class="bn">মেয়ে</span></button>
+      </div>
+      <div class="group" role="group" aria-label="Type">
+        <span class="group-label">Type</span>
+        <button class="chip" data-t="all" aria-pressed="true">All</button>
+        <button class="chip" data-t="shirt" aria-pressed="false">Shirt</button>
+        <button class="chip" data-t="panjabi" aria-pressed="false">Panjabi</button>
+        <button class="chip" data-t="pant" aria-pressed="false">Pant</button>
+        <button class="chip" data-t="western" aria-pressed="false">Western</button>
+      </div>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section class="story">
+    <div><div class="mk"></div><h3>Fabric first</h3><p>Linen, cotton, handloom and satin, chosen for how they feel after hours of wear.</p></div>
+    <div><div class="mk"></div><h3>One line, every occasion</h3><p>From a Friday panjabi to an office shirt and an evening dress, one palette that mixes together.</p></div>
+    <div><div class="mk"></div><h3>Sized for real people</h3><p>S to XL across men's and women's ranges, so you pick a size once and it stays true.</p></div>
+  </section>
+
+  <footer>
+    <a class="logo" href="#top">Threads<i>line</i></a>
+    <div>&copy; Threadsline. Shirt &middot; Panjabi &middot; Pant &middot; Western</div>
+  </footer>
+</main>
+
+<div class="veil" id="veil" hidden></div>
+<aside class="drawer" id="drawer" aria-label="Shopping bag" hidden>
+  <div class="d-head"><h2 id="dTitle">Your bag</h2><button class="x" id="closeCart" aria-label="Close bag">&times;</button></div>
+  <div class="d-body" id="dBody"></div>
+  <div class="d-foot" id="dFoot"></div>
+</aside>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function () {
+  var TK = "৳";
+  function money(n) { return TK + n.toLocaleString("en-US"); }
+
+  /* garment drawings, one per shape */
+  function garment(shape, c) {
+    var s = 'stroke="rgba(0,0,0,.32)" stroke-width="1.4" stroke-linejoin="round"';
+    var d = 'stroke="rgba(0,0,0,.3)" stroke-width="1.2" fill="none" stroke-linecap="round"';
+    var btn = function (x, y) { return '<circle cx="' + x + '" cy="' + y + '" r="2.1" fill="rgba(255,255,255,.75)" stroke="rgba(0,0,0,.3)" stroke-width=".8"/>'; };
+    var body = "";
+    if (shape === "shirt") {
+      body = '<path d="M60 40 L85 28 Q100 40 115 28 L140 40 L182 88 L160 106 L142 86 L142 216 L58 216 L58 86 L40 106 L18 88 Z" fill="' + c + '" ' + s + '/>' +
+        '<path d="M85 28 L100 54 L115 28" ' + d + '/><path d="M100 54 V216" ' + d + '/>' + btn(100, 78) + btn(100, 108) + btn(100, 138) + btn(100, 168) + btn(100, 198);
+    } else if (shape === "panjabi") {
+      body = '<path d="M62 38 L86 26 Q100 36 114 26 L138 38 L178 92 L156 108 L142 90 L146 232 L54 232 L58 90 L44 108 L22 92 Z" fill="' + c + '" ' + s + '/>' +
+        '<path d="M86 26 Q100 44 114 26" ' + d + '/><path d="M100 40 V118" ' + d + '/>' + btn(100, 56) + btn(100, 78) + btn(100, 100) +
+        '<path d="M54 196 H146" ' + d + ' stroke-dasharray="3 4"/><path d="M54 232 L58 206 M146 232 L142 206" ' + d + '/>';
+    } else if (shape === "pant") {
+      body = '<path d="M60 18 H140 L152 82 L140 226 H106 L100 104 L94 226 H60 L48 82 Z" fill="' + c + '" ' + s + '/>' +
+        '<path d="M60 34 H140" ' + d + '/><path d="M100 34 V104" ' + d + '/>' + btn(100, 27) + '<path d="M72 36 Q84 56 80 74 M128 36 Q116 56 120 74" ' + d + '/>';
+    } else if (shape === "jacket") {
+      body = '<path d="M58 36 L84 26 L100 62 L116 26 L142 36 L186 124 L164 136 L146 102 L146 204 L54 204 L54 102 L36 136 L14 124 Z" fill="' + c + '" ' + s + '/>' +
+        '<path d="M84 26 L100 62 L100 204 M116 26 L100 62" ' + d + '/><path d="M70 150 H88 M112 150 H130" ' + d + '/>' + btn(100, 100) + btn(100, 130) + btn(100, 160);
+    } else {
+      body = '<path d="M78 22 L88 22 L100 46 L112 22 L122 22 L130 82 L172 226 L28 226 L70 82 Z" fill="' + c + '" ' + s + '/>' +
+        '<path d="M70 84 Q100 94 130 84" ' + d + '/><path d="M100 46 V84" ' + d + '/><path d="M64 160 Q100 172 136 160" ' + d + ' stroke-dasharray="3 4"/>';
+    }
+    return '<svg viewBox="0 0 200 244" role="img" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">' + body + '</svg>';
+  }
+
+  var P = [
+    { id: 1, g: "men", t: "shirt", n: "Linen Oxford Shirt", p: 1450, c: "#9CAE9B", sh: "shirt", tag: "New" },
+    { id: 2, g: "men", t: "shirt", n: "Slate Cotton Shirt", p: 1650, c: "#4B5A86", sh: "shirt" },
+    { id: 3, g: "men", t: "panjabi", n: "Handloom Panjabi", p: 2650, c: "#1F3D36", sh: "panjabi", tag: "Bestseller" },
+    { id: 4, g: "men", t: "panjabi", n: "Chikankari Panjabi", p: 3250, c: "#D9D5C7", sh: "panjabi" },
+    { id: 5, g: "men", t: "pant", n: "Tailored Chino", p: 1850, c: "#8A7B66", sh: "pant" },
+    { id: 6, g: "men", t: "pant", n: "Pleated Trouser", p: 2250, c: "#2B2F3A", sh: "pant", tag: "New" },
+    { id: 7, g: "men", t: "western", n: "Unstructured Blazer", p: 4250, c: "#3A4A5C", sh: "jacket" },
+    { id: 8, g: "men", t: "western", n: "Field Bomber Jacket", p: 3650, c: "#5B6B4E", sh: "jacket" },
+    { id: 9, g: "women", t: "shirt", n: "Poplin Boyfriend Shirt", p: 1550, c: "#BFCBE0", sh: "shirt" },
+    { id: 10, g: "women", t: "shirt", n: "Satin Button-Up", p: 1950, c: "#9E5A63", sh: "shirt", tag: "New" },
+    { id: 11, g: "women", t: "panjabi", n: "Block-Print Panjabi", p: 2450, c: "#B8934F", sh: "panjabi" },
+    { id: 12, g: "women", t: "panjabi", n: "Festive Embroidered Panjabi", p: 3450, c: "#5A2E4A", sh: "panjabi", tag: "Bestseller" },
+    { id: 13, g: "women", t: "pant", n: "High-Waist Wide Pant", p: 2050, c: "#2E3B35", sh: "pant" },
+    { id: 14, g: "women", t: "pant", n: "Straight Ankle Pant", p: 1950, c: "#D2CCBC", sh: "pant" },
+    { id: 15, g: "women", t: "western", n: "Wrap Midi Dress", p: 3150, c: "#27336B", sh: "dress", tag: "New" },
+    { id: 16, g: "women", t: "western", n: "Tiered Summer Dress", p: 2850, c: "#E2B9AA", sh: "dress" }
+  ];
+  var TYPE = { shirt: "Shirt", panjabi: "Panjabi", pant: "Pant", western: "Western" };
+  var SIZES = ["S", "M", "L", "XL"];
+  var byId = {}; P.forEach(function (p) { byId[p.id] = p; });
+
+  var state = { g: "all", t: "all", size: {}, cart: [] };
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* hero + tiles */
+  $("heroSvg").innerHTML = garment("panjabi", "#27336B");
+  $("tileMen").innerHTML = garment("shirt", "#9CAE9B");
+  $("tileWomen").innerHTML = garment("dress", "#9E5A63");
+
+  /* grid */
+  function renderGrid() {
+    var list = P.filter(function (p) { return (state.g === "all" || p.g === state.g) && (state.t === "all" || p.t === state.t); });
+    var gl = state.g === "all" ? "all" : (state.g === "men" ? "men's" : "women's");
+    $("count").textContent = list.length + " pieces · " + gl + (state.t === "all" ? "" : " " + TYPE[state.t].toLowerCase());
+    if (!list.length) { $("grid").innerHTML = '<div class="empty" style="grid-column:1/-1">Nothing here yet. Try another type.</div>'; return; }
+    $("grid").innerHTML = list.map(function (p) {
+      var sel = state.size[p.id] || "M";
+      var sizes = SIZES.map(function (z) {
+        return '<button class="sz" data-sz="' + z + '" data-id="' + p.id + '" aria-pressed="' + (z === sel) + '" aria-label="Size ' + z + '">' + z + '</button>';
+      }).join("");
+      return '<article class="card"><div class="shot">' + (p.tag ? '<span class="tag">' + p.tag + '</span>' : '') + garment(p.sh, p.c) + '</div>' +
+        '<div class="meta"><div><h3 class="name">' + p.n + '</h3><p class="kind">' + (p.g === "men" ? "Men" : "Women") + ' · ' + TYPE[p.t] + '</p></div><div class="price">' + money(p.p) + '</div></div>' +
+        '<div class="row"><div class="sizes">' + sizes + '</div><button class="add" data-add="' + p.id + '">Add</button></div></article>';
+    }).join("");
+  }
+
+  function syncChips() {
+    document.querySelectorAll("[data-g]").forEach(function (b) { if (b.classList.contains("chip")) b.setAttribute("aria-pressed", String(b.dataset.g === state.g)); });
+    document.querySelectorAll("[data-t]").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.t === state.t)); });
+  }
+
+  /* toast */
+  var tt;
+  function toast(msg) { var t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(tt); tt = setTimeout(function () { t.hidden = true; }, 1800); }
+
+  /* cart */
+  function cartTotal() { return state.cart.reduce(function (s, i) { return s + byId[i.id].p * i.q; }, 0); }
+  function cartQty() { return state.cart.reduce(function (s, i) { return s + i.q; }, 0); }
+  function addToCart(id, size) {
+    var f = state.cart.filter(function (i) { return i.id === id && i.s === size; })[0];
+    if (f) f.q++; else state.cart.push({ id: id, s: size, q: 1 });
+    $("cartCount").textContent = cartQty();
+    toast("Added " + byId[id].n + " (" + size + ")");
+  }
+  var view = "bag";
+  function openCart(v) { view = v || "bag"; $("veil").hidden = false; $("drawer").hidden = false; renderDrawer(); }
+  function closeCart() { $("veil").hidden = true; $("drawer").hidden = true; }
+
+  function renderDrawer() {
+    var body = $("dBody"), foot = $("dFoot");
+    $("dTitle").textContent = view === "bag" ? "Your bag" : "Checkout";
+    if (!state.cart.length) {
+      body.innerHTML = '<div class="empty">Your bag is empty.</div>';
+      foot.innerHTML = '<button class="ghost" id="keep">Keep shopping</button>';
+      $("keep").onclick = closeCart; return;
+    }
+    if (view === "bag") {
+      body.innerHTML = state.cart.map(function (i, ix) {
+        var p = byId[i.id];
+        return '<div class="line"><div class="th">' + garment(p.sh, p.c) + '</div><div><div class="nm">' + p.n + '</div><div class="sm">' + (p.g === "men" ? "Men" : "Women") + ' · ' + TYPE[p.t] + ' · Size ' + i.s + '</div>' +
+          '<div class="qty"><button data-dec="' + ix + '" aria-label="Less">&minus;</button><span>' + i.q + '</span><button data-inc="' + ix + '" aria-label="More">+</button></div></div>' +
+          '<div><div class="lp">' + money(p.p * i.q) + '</div><button class="rm" data-rm="' + ix + '">Remove</button></div></div>';
+      }).join("");
+      foot.innerHTML = '<div class="tot"><span>Subtotal</span><span>' + money(cartTotal()) + '</span></div><p class="note">Delivery is added at checkout.</p><button class="cta" id="toCheckout">Checkout</button>';
+      $("toCheckout").onclick = function () { view = "checkout"; renderDrawer(); };
+    } else {
+      body.innerHTML = '<div style="padding-top:12px">' +
+        '<div class="field"><label for="fName">Name</label><input id="fName" autocomplete="name"></div>' +
+        '<div class="field"><label for="fPhone">Phone</label><input id="fPhone" inputmode="tel" autocomplete="tel"></div>' +
+        '<div class="field"><label for="fAddr">Delivery address</label><textarea id="fAddr" rows="3"></textarea></div>' +
+        '<div style="border-top:1px solid var(--line);padding-top:12px">' + state.cart.map(function (i) {
+          var p = byId[i.id]; return '<div class="sumline"><span>' + i.q + ' × ' + p.n + ' (' + i.s + ')</span><span>' + money(p.p * i.q) + '</span></div>';
+        }).join("") + '</div></div>';
+      foot.innerHTML = '<div class="tot"><span>Total</span><span>' + money(cartTotal()) + '</span></div><p class="note">This storefront has no payment or order system connected yet. Copy the order details and send them to the shop.</p><button class="cta" id="copyOrder">Copy order details</button><button class="ghost" id="backBag">Back to bag</button>';
+      $("backBag").onclick = function () { view = "bag"; renderDrawer(); };
+      $("copyOrder").onclick = copyOrder;
+    }
+  }
+  function orderText() {
+    var lines = state.cart.map(function (i) { var p = byId[i.id]; return i.q + " x " + p.n + " (" + (p.g === "men" ? "Men" : "Women") + ", " + TYPE[p.t] + ", " + i.s + ") - " + money(p.p * i.q); });
+    var n = $("fName") ? $("fName").value : "", ph = $("fPhone") ? $("fPhone").value : "", a = $("fAddr") ? $("fAddr").value : "";
+    return "Threadsline order\n" + lines.join("\n") + "\nTotal: " + money(cartTotal()) + "\nName: " + n + "\nPhone: " + ph + "\nAddress: " + a;
+  }
+  function copyOrder() {
+    var txt = orderText();
+    function fallback() {
+      var ta = document.createElement("textarea"); ta.value = txt; ta.style.cssText = "position:fixed;opacity:0"; document.body.appendChild(ta); ta.select();
+      var ok = false; try { ok = document.execCommand("copy"); } catch (e) {} document.body.removeChild(ta);
+      toast(ok ? "Order details copied" : "Copy not available here");
+    }
+    try { navigator.clipboard.writeText(txt).then(function () { toast("Order details copied"); }, fallback); } catch (e) { fallback(); }
+  }
+
+  /* events */
+  document.addEventListener("click", function (e) {
+    var el = e.target.closest("button, a");
+    if (!el) return;
+    if (el.dataset.sz) { state.size[el.dataset.id] = el.dataset.sz; el.parentNode.querySelectorAll(".sz").forEach(function (b) { b.setAttribute("aria-pressed", String(b === el)); }); return; }
+    if (el.dataset.add) { var id = +el.dataset.add; addToCart(id, state.size[id] || "M"); return; }
+    if (el.dataset.inc) { state.cart[+el.dataset.inc].q++; $("cartCount").textContent = cartQty(); renderDrawer(); return; }
+    if (el.dataset.dec) { var it = state.cart[+el.dataset.dec]; it.q--; if (it.q < 1) state.cart.splice(+el.dataset.dec, 1); $("cartCount").textContent = cartQty(); renderDrawer(); return; }
+    if (el.dataset.rm) { state.cart.splice(+el.dataset.rm, 1); $("cartCount").textContent = cartQty(); renderDrawer(); return; }
+    if (el.classList.contains("chip")) {
+      if (el.dataset.g) state.g = el.dataset.g;
+      if (el.dataset.t) state.t = el.dataset.t;
+      syncChips(); renderGrid(); return;
+    }
+    if (el.dataset.go) {
+      state.g = el.dataset.go; state.t = "all"; syncChips(); renderGrid();
+      if (el.tagName === "BUTTON") $("shop").scrollIntoView({ behavior: "smooth" });
+      return;
+    }
+  });
+  $("openCart").onclick = function () { openCart("bag"); };
+  $("closeCart").onclick = closeCart;
+  $("veil").onclick = closeCart;
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeCart(); });
+
+  renderGrid();
+})();
+</script>
+
+</body></html>
