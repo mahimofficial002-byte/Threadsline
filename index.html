@@ -7,8 +7,6 @@
   <meta name="claude:viewport-fit-sides" content="cover">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;1,6..96,400&family=Manrope:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap">
   <style>
-    /* Layout: sticky slim header, split Men/Women hero, filter bar (gender + garment type), 4-up product grid, slide-in cart drawer.
-       Palette: stone paper, ink, deep indigo thread, sage, muted brass line. */
     :root {
       --bg: #EFF0ED;
       --surface: #F8F8F6;
@@ -55,7 +53,6 @@
     :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
     .wrap { max-width: 1240px; margin: 0 auto; }
 
-    /* header */
     .bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); border-bottom: 1px solid var(--line); }
     .bar-in { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 14px; }
     .logo { font-family: var(--font-display); font-size: 26px; letter-spacing: .02em; text-decoration: none; display: inline-flex; align-items: baseline; gap: 1px; }
@@ -67,7 +64,6 @@
     .cart-btn:hover { background: var(--fg); color: var(--bg); }
     .cart-count { font-variant-numeric: tabular-nums; min-width: 20px; height: 20px; border-radius: 10px; background: var(--accent); color: var(--accent-fg); font-size: 11px; display: inline-grid; place-items: center; padding-inline: 5px; }
 
-    /* hero */
     .hero { display: grid; grid-template-columns: 1.1fr 1fr; gap: 40px; align-items: end; padding-block: 64px 48px; }
     .eyebrow { font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 12px; }
     .eyebrow::before { content: ""; width: 36px; height: 1px; background: var(--brass); }
@@ -81,7 +77,6 @@
     .hero-art svg { width: 78%; max-width: 100%; height: auto; }
     .hero-art .stitch { position: absolute; inset: 14px; border: 1px dashed var(--brass); border-radius: 190px 190px 2px 2px; pointer-events: none; opacity: .7; }
 
-    /* chele / meye tiles */
     .split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding-bottom: 24px; }
     .tile { position: relative; display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 26px 26px 22px; min-height: 190px; overflow: hidden; }
     .tile:hover { border-color: var(--fg); }
@@ -91,7 +86,6 @@
     .tile .art { width: 120px; flex: none; }
     .tile .art svg { width: 100%; height: auto; display: block; }
 
-    /* shop */
     .shop { padding-top: 40px; scroll-margin-top: 80px; }
     .shop-head { display: flex; justify-content: space-between; align-items: end; gap: 16px; flex-wrap: wrap; }
     .shop-head h2 { font-family: var(--font-display); font-weight: 400; font-size: clamp(30px, 4vw, 44px); margin: 0; line-height: 1.05; }
@@ -123,7 +117,6 @@
     .add:hover { background: var(--fg); color: var(--bg); }
     .empty { grid-column: 1 / -1; padding: 60px 0; text-align: center; color: var(--muted); }
 
-    /* story strip */
     .story { margin-top: 72px; border-block: 1px solid var(--line); padding-block: 40px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
     .story h3 { font-family: var(--font-display); font-weight: 400; font-size: 22px; margin: 0 0 8px; }
     .story p { margin: 0; color: var(--muted); font-size: 14px; max-width: 38ch; }
@@ -132,7 +125,6 @@
     footer { padding-block: 40px 48px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 18px; color: var(--muted); font-size: 13px; }
     footer .logo { color: var(--fg); font-size: 22px; }
 
-    /* cart drawer */
     .veil { position: fixed; inset: 0; background: rgba(10, 12, 16, .5); z-index: 50; }
     .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(430px, 100%); background: var(--surface); z-index: 60; display: flex; flex-direction: column; border-left: 1px solid var(--line);
       padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) 0; }
@@ -273,7 +265,7 @@
     // ── Telegram Order Bot Config ─────────────────────────────────────────────
     var TELEGRAM = {
       botToken: "9225333408:AAHO_NADGVe2VidDF2SM84nwVPdoS57u0eI",
-      chatId: "YOUR_CHAT_ID", // e.g. "123456789" or "-100..."
+      chatId: "9049463635",
       deliveryCharge: 80
     };
 
@@ -286,7 +278,6 @@
       });
     }
 
-    /* garment drawings, one per shape */
     function garment(shape, c) {
       var s = 'stroke="rgba(0,0,0,.32)" stroke-width="1.4" stroke-linejoin="round"';
       var d = 'stroke="rgba(0,0,0,.3)" stroke-width="1.2" fill="none" stroke-linecap="round"';
@@ -474,7 +465,7 @@
 
         dBody.innerHTML =
           '<form id="orderForm" novalidate>' +
-            '<div class="field"><label for="cName">Full Name</label><input id="cName" name="name" type="text" required placeholder="e.g. Mirazhe Ahmed"></div>' +
+            '<div class="field"><label for="cName">Full Name</label><input id="cName" name="name" type="text" required placeholder="e.g. Mirazhé"></div>' +
             '<div class="field"><label for="cPhone">Phone / WhatsApp</label><input id="cPhone" name="phone" type="tel" required placeholder="017XXXXXXXX"></div>' +
             '<div class="field"><label for="cAddr">Delivery Address</label><textarea id="cAddr" name="address" rows="3" required placeholder="House, road, area, district"></textarea></div>' +
             '<div class="field"><label for="cNote">Note (Optional)</label><input id="cNote" name="note" type="text" placeholder="Delivery time or size note"></div>' +
@@ -488,7 +479,7 @@
         dFoot.innerHTML =
           '<div class="tot"><span>Total</span><span>' + money(grand) + '</span></div>' +
           '<button class="cta" type="submit" form="orderForm"' + (state.sending ? ' disabled' : '') + '>' +
-            (state.sending ? 'Sending to Telegram...' : 'Confirm Order via Telegram') +
+            (state.sending ? 'Sending order...' : 'Place Order') +
           '</button>' +
           '<button class="ghost" type="button" id="backToBag"' + (state.sending ? ' disabled' : '') + '>Back to bag</button>';
         return;
@@ -522,7 +513,7 @@
 
       dFoot.innerHTML =
         '<div class="tot"><span>Subtotal</span><span>' + money(sub) + '</span></div>' +
-        '<p class="note">Cash on delivery available. Order details go directly to Threadsline Telegram.</p>' +
+        '<p class="note">Cash on delivery available. Submitting places your order directly.</p>' +
         '<button class="cta" type="button" id="goCheckout">Proceed to order</button>';
     }
 
@@ -572,11 +563,6 @@
     }
 
     function sendOrderToTelegram(customer) {
-      if (!TELEGRAM.botToken || TELEGRAM.botToken.indexOf("YOUR_") === 0 ||
-          !TELEGRAM.chatId || TELEGRAM.chatId.indexOf("YOUR_") === 0) {
-        return Promise.reject(new Error("Set your Telegram chatId in the code first."));
-      }
-
       var url = "https://api.telegram.org/bot" + encodeURIComponent(TELEGRAM.botToken) + "/sendMessage";
       var payload = {
         chat_id: TELEGRAM.chatId,
@@ -598,7 +584,6 @@
       });
     }
 
-    // ── Events ────────────────────────────────────────────────────────────────
     document.addEventListener("click", function (e) {
       var go = e.target.closest("[data-go]");
       if (go) {
@@ -693,11 +678,11 @@
           state.view = "cart";
           syncBadge();
           closeDrawer();
-          toast("Order sent to Telegram!");
+          toast("Order placed! Sent to Telegram.");
         })
         .catch(function (err) {
           state.sending = false;
-          state.error = err && err.message ? err.message : "Could not send order. Check your bot settings.";
+          state.error = err && err.message ? err.message : "Could not place order. Check bot settings.";
           renderDrawer();
         });
     });
