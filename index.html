@@ -150,6 +150,12 @@
     .field { display: grid; gap: 6px; margin-bottom: 14px; }
     .field label { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
     .field input, .field textarea { font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 11px 12px; width: 100%; resize: vertical; }
+    .zone-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .zone-btn { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; border: 1px solid var(--line); background: var(--bg); border-radius: 6px; padding: 10px 12px; text-align: left; }
+    .zone-btn:hover { border-color: var(--fg); }
+    .zone-btn[aria-pressed="true"] { border-color: var(--accent); background: var(--tile); box-shadow: inset 0 0 0 1px var(--accent); }
+    .zone-title { font-family: var(--font-bn); font-size: 14px; font-weight: 600; }
+    .zone-fee { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
     .sumline { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; padding-block: 4px; }
     .ghost { background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 12px; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; }
     .ghost:hover { border-color: var(--fg); }
@@ -264,9 +270,12 @@
   (function () {
     // ── Telegram Order Bot Config ─────────────────────────────────────────────
     var TELEGRAM = {
-      botToken: "9225333408:AAHO_NADGVe2VidDF2SM84nwVPdoS57u0eI",
-      chatId: "9049463635",
-      deliveryCharge: 80
+      botToken: "9225333408:AAHO_NADGVe2VidDF2SM84nwVPdoS57u0eI", //[cite: 1]
+      chatId: "9049463635", //[cite: 3]
+      delivery: {
+        inside: { label: "ঢাকার ভেতরে", fee: 80 },
+        outside: { label: "ঢাকার বাইরে", fee: 130 }
+      }
     };
 
     var TK = "৳";
@@ -326,7 +335,16 @@
     document.getElementById("tileMen").innerHTML = garment("shirt", "#4B5A86");
     document.getElementById("tileWomen").innerHTML = garment("dress", "#8E97B8");
 
-    var state = { g: "all", t: "all", sizes: {}, cart: [], view: "cart", sending: false, error: "" };
+    var state = {
+      g: "all",
+      t: "all",
+      sizes: {},
+      cart: [],
+      view: "cart",
+      zone: "inside",
+      sending: false,
+      error: ""
+    };
     P.forEach(function (item) { state.sizes[item.id] = "M"; });
 
     var grid = document.getElementById("grid");
@@ -409,6 +427,12 @@
       return state.cart.reduce(function (sum, line) { return sum + line.p * line.qty; }, 0);
     }
 
+    function currentDelivery() {
+      if (!state.cart.length) return { key: state.zone, label: TELEGRAM.delivery[state.zone].label, fee: 0 };
+      var z = TELEGRAM.delivery[state.zone] || TELEGRAM.delivery.inside;
+      return { key: state.zone, label: z.label, fee: z.fee };
+    }
+
     function syncBadge() {
       cartCountEl.textContent = String(totalQty());
     }
@@ -452,10 +476,32 @@
       renderDrawer();
     }
 
+    function preserveFormValues() {
+      var form = document.getElementById("orderForm");
+      if (!form) return null;
+      return {
+        name: form.name ? form.name.value : "",
+        phone: form.phone ? form.phone.value : "",
+        address: form.address ? form.address.value : "",
+        note: form.note ? form.note.value : ""
+      };
+    }
+
+    function restoreFormValues(saved) {
+      if (!saved) return;
+      var form = document.getElementById("orderForm");
+      if (!form) return;
+      if (form.name) form.name.value = saved.name;
+      if (form.phone) form.phone.value = saved.phone;
+      if (form.address) form.address.value = saved.address;
+      if (form.note) form.note.value = saved.note;
+    }
+
     function renderDrawer() {
+      var savedForm = state.view === "checkout" ? preserveFormValues() : null;
       var sub = subtotal();
-      var del = state.cart.length ? TELEGRAM.deliveryCharge : 0;
-      var grand = sub + del;
+      var del = currentDelivery();
+      var grand = sub + del.fee;
 
       if (state.view === "checkout") {
         dTitle.textContent = "Checkout";
@@ -463,18 +509,37 @@
           return '<div class="sumline"><span>' + esc(line.n) + ' (' + esc(line.sz) + ') &times; ' + line.qty + '</span><strong>' + money(line.p * line.qty) + '</strong></div>';
         }).join("");
 
+        var insideFee = TELEGRAM.delivery.inside.fee;
+        var outsideFee = TELEGRAM.delivery.outside.fee;
+
         dBody.innerHTML =
           '<form id="orderForm" novalidate>' +
             '<div class="field"><label for="cName">Full Name</label><input id="cName" name="name" type="text" required placeholder="e.g. Mirazhé"></div>' +
             '<div class="field"><label for="cPhone">Phone / WhatsApp</label><input id="cPhone" name="phone" type="tel" required placeholder="017XXXXXXXX"></div>' +
+            '<div class="field">' +
+              '<label>Delivery Zone</label>' +
+              '<div class="zone-grid" role="group" aria-label="Delivery Zone">' +
+                '<button class="zone-btn" type="button" data-zone="inside" aria-pressed="' + (state.zone === "inside") + '">' +
+                  '<span class="zone-title">ঢাকার ভেতরে</span>' +
+                  '<span class="zone-fee">' + money(insideFee) + '</span>' +
+                '</button>' +
+                '<button class="zone-btn" type="button" data-zone="outside" aria-pressed="' + (state.zone === "outside") + '">' +
+                  '<span class="zone-title">ঢাকার বাইরে</span>' +
+                  '<span class="zone-fee">' + money(outsideFee) + '</span>' +
+                '</button>' +
+              '</div>' +
+            '</div>' +
             '<div class="field"><label for="cAddr">Delivery Address</label><textarea id="cAddr" name="address" rows="3" required placeholder="House, road, area, district"></textarea></div>' +
             '<div class="field"><label for="cNote">Note (Optional)</label><input id="cNote" name="note" type="text" placeholder="Delivery time or size note"></div>' +
           '</form>' +
           '<div style="border-top:1px solid var(--line);padding-top:12px;margin-top:6px">' +
+            '<div class="sumline"><span>Subtotal</span><strong>' + money(sub) + '</strong></div>' +
             linesHtml +
-            (del ? '<div class="sumline"><span>Delivery</span><strong>' + money(del) + '</strong></div>' : '') +
+            '<div class="sumline"><span>Delivery (' + esc(del.label) + ')</span><strong>' + money(del.fee) + '</strong></div>' +
           '</div>' +
           (state.error ? '<p class="err" role="alert">' + esc(state.error) + '</p>' : '');
+
+        restoreFormValues(savedForm);
 
         dFoot.innerHTML =
           '<div class="tot"><span>Total</span><span>' + money(grand) + '</span></div>' +
@@ -513,7 +578,7 @@
 
       dFoot.innerHTML =
         '<div class="tot"><span>Subtotal</span><span>' + money(sub) + '</span></div>' +
-        '<p class="note">Cash on delivery available. Submitting places your order directly.</p>' +
+        '<p class="note">Delivery: ঢাকার ভেতরে ' + money(TELEGRAM.delivery.inside.fee) + ' · ঢাকার বাইরে ' + money(TELEGRAM.delivery.outside.fee) + '</p>' +
         '<button class="cta" type="button" id="goCheckout">Proceed to order</button>';
     }
 
@@ -533,8 +598,8 @@
 
     function buildTelegramMessage(customer) {
       var sub = subtotal();
-      var del = TELEGRAM.deliveryCharge || 0;
-      var grand = sub + del;
+      var del = currentDelivery();
+      var grand = sub + del.fee;
       var now = new Date().toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" });
 
       var items = state.cart.map(function (item, i) {
@@ -547,6 +612,7 @@
         "",
         "👤 *Customer:* " + customer.name,
         "📞 *Phone:* " + customer.phone,
+        "🚚 *Delivery Zone:* " + del.label + " (" + money(del.fee) + ")",
         "📍 *Address:* " + customer.address
       ];
       if (customer.note) lines.push("📝 *Note:* " + customer.note);
@@ -556,7 +622,7 @@
         items,
         "",
         "Subtotal: " + money(sub),
-        "Delivery: " + money(del),
+        "Delivery: " + money(del.fee),
         "*Total: " + money(grand) + "*"
       );
       return lines.join("\n");
@@ -615,6 +681,13 @@
       var addBtn = e.target.closest("[data-add]");
       if (addBtn) {
         addToCart(Number(addBtn.getAttribute("data-add")));
+        return;
+      }
+
+      var zoneBtn = e.target.closest("[data-zone]");
+      if (zoneBtn) {
+        state.zone = zoneBtn.getAttribute("data-zone");
+        renderDrawer();
         return;
       }
 
